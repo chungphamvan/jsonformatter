@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter with Tree View</title>
+    <!-- React Icons via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@iconify/iconify@3.1.1/dist/iconify.min.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="iconify" data-icon="mdi:file-tree" data-inline="false" style="vertical-align: middle;"></span>
+                JSON Formatter with Tree View
+            </h1>
+            <p>Format, collapse/expand và so sánh JSON data</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="formatBoth()">
+                <span class="iconify" data-icon="mdi:auto-fix"></span>
+                Format Both
+            </button>
+            <button class="btn btn-success" onclick="compareJSON()">
+                <span class="iconify" data-icon="mdi:compare"></span>
+                Compare
+            </button>
+            <button class="btn btn-info" onclick="expandAllTrees()">
+                <span class="iconify" data-icon="mdi:folder-open"></span>
+                Expand All
+            </button>
+            <button class="btn btn-info" onclick="collapseAllTrees()">
+                <span class="iconify" data-icon="mdi:folder"></span>
+                Collapse All
+            </button>
+            <button class="btn btn-warning" onclick="minifyBoth()">
+                <span class="iconify" data-icon="mdi:package-variant-closed"></span>
+                Minify Both
+            </button>
+            <button class="btn btn-danger" onclick="clearAll()">
+                <span class="iconify" data-icon="mdi:delete"></span>
+                Clear All
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="json-panels-container">
+                <div class="json-panel" id="panel1">
+                    <div class="panel-header">
+                        <span>
+                            <span class="iconify" data-icon="mdi:file-document-outline"></span>
+                            JSON Data 1
+                        </span>
+                        <div class="view-toggle">
+                            <button class="toggle-btn active" onclick="switchView(1, 'text')">
+                                <span class="iconify" data-icon="mdi:text"></span>
+                                Text
+                            </button>
+                            <button class="toggle-btn" onclick="switchView(1, 'single')">
+                                <span class="iconify" data-icon="mdi:code-tags"></span>
+                                Single Line
+                            </button>
+                            <button class="toggle-btn" onclick="switchView(1, 'tree')">
+                                <span class="iconify" data-icon="mdi:file-tree"></span>
+                                Tree
+                            </button>
+                        </div>
+                    </div>
+                    <div class="textarea-wrapper" id="wrapper1">
+                        <div class="line-numbers" id="lineNumbers1"></div>
+                        <textarea id="json1" placeholder='Paste JSON data 1 here...' oninput="updateLineNumbers(1)" onscroll="syncScroll(1)"></textarea>
+                        <button class="copy-button" id="copyBtn1" onclick="copyContent(1)" title="Copy to clipboard">
+                            <span class="iconify" data-icon="mdi:content-copy"></span>
+                        </button>
+                    </div>
+                    <div id="tree1" class="tree-view"></div>
+                    <div class="panel-controls">
+                        <button class="btn btn-primary" onclick="formatJSON(1)">Format JSON 1</button>
+                        <button class="btn btn-info" onclick="renderTree(1)">Show Tree View</button>
+                    </div>
+                </div>
+
+                <div class="resize-handle" id="resizeHandle">
+                    <div class="resize-handle-line"></div>
+                    <div class="resize-handle-grip">
+                        <span class="iconify" data-icon="mdi:drag-vertical"></span>
+                    </div>
+                </div>
+
+                <div class="json-panel" id="panel2">
+                    <div class="panel-header">
+                        <span>
+                            <span class="iconify" data-icon="mdi:file-document-outline"></span>
+                            JSON Data 2
+                        </span>
+                        <div class="view-toggle">
+                            <button class="toggle-btn active" onclick="switchView(2, 'text')">
+                                <span class="iconify" data-icon="mdi:text"></span>
+                                Text
+                            </button>
+                            <button class="toggle-btn" onclick="switchView(2, 'single')">
+                                <span class="iconify" data-icon="mdi:code-tags"></span>
+                                Single Line
+                            </button>
+                            <button class="toggle-btn" onclick="switchView(2, 'tree')">
+                                <span class="iconify" data-icon="mdi:file-tree"></span>
+                                Tree
+                            </button>
+                        </div>
+                    </div>
+                    <div class="textarea-wrapper" id="wrapper2">
+                        <div class="line-numbers" id="lineNumbers2"></div>
+                        <textarea id="json2" placeholder='Paste JSON data 2 here...' oninput="updateLineNumbers(2)" onscroll="syncScroll(2)"></textarea>
+                        <button class="copy-button" id="copyBtn2" onclick="copyContent(2)" title="Copy to clipboard">
+                            <span class="iconify" data-icon="mdi:content-copy"></span>
+                        </button>
+                    </div>
+                    <div id="tree2" class="tree-view"></div>
+                    <div class="panel-controls">
+                        <button class="btn btn-primary" onclick="formatJSON(2)">Format JSON 2</button>
+                        <button class="btn btn-info" onclick="renderTree(2)">Show Tree View</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-panel">
+                <div class="panel-header">
+                    <span class="iconify" data-icon="mdi:chart-box-outline"></span>
+                    Comparison Result
+                </div>
+                <div id="result"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Copyright © 2025 <strong>Shino</strong> JSON Formatter - All Rights Reserved</p>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/script.js"></script>
+</body>
+</html>
