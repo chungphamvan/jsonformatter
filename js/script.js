@@ -46,23 +46,35 @@ function switchView(num, view) {
     const previousView = currentView[num];
     currentView[num] = view;
 
-    // Remove active class from all buttons
-    buttons.forEach(btn => btn.classList.remove('active'));
+    // Remove active class and update aria-pressed for all buttons
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
 
     if (view === 'tree') {
         wrapper.style.display = 'none';
         treeView.classList.add('active');
-        if (buttons[2]) buttons[2].classList.add('active');
+        if (buttons[2]) {
+            buttons[2].classList.add('active');
+            buttons[2].setAttribute('aria-pressed', 'true');
+        }
         renderTree(num);
     } else if (view === 'single') {
         wrapper.style.display = 'flex';
         treeView.classList.remove('active');
-        if (buttons[1]) buttons[1].classList.add('active');
+        if (buttons[1]) {
+            buttons[1].classList.add('active');
+            buttons[1].setAttribute('aria-pressed', 'true');
+        }
         convertToSingleLine(num);
     } else { // text
         wrapper.style.display = 'flex';
         treeView.classList.remove('active');
-        if (buttons[0]) buttons[0].classList.add('active');
+        if (buttons[0]) {
+            buttons[0].classList.add('active');
+            buttons[0].setAttribute('aria-pressed', 'true');
+        }
 
         // If coming from single line mode, auto-format back to pretty print
         if (previousView === 'single') {
@@ -72,10 +84,7 @@ function switchView(num, view) {
                 jsonObjects[num] = json;
                 textarea.value = JSON.stringify(json, null, 2);
                 updateLineNumbers(num);
-                resultDiv.innerHTML = `<div class="success-message">
-                    <span class="iconify" data-icon="mdi:check-circle"></span>
-                    JSON ${num} formatted to text mode!
-                </div>`;
+                showMessage(resultDiv, 'success', `JSON ${num} formatted to text mode!`, 'mdi:check-circle');
             } catch (e) {
                 // If parse fails, just keep the current value
             }
@@ -95,15 +104,9 @@ function convertToSingleLine(num) {
         jsonObjects[num] = json;
         textarea.value = JSON.stringify(json);
         updateLineNumbers(num);
-        resultDiv.innerHTML = `<div class="success-message">
-            <span class="iconify" data-icon="mdi:check-circle"></span>
-            JSON ${num} converted to single line!
-        </div>`;
+        showMessage(resultDiv, 'success', `JSON ${num} converted to single line!`, 'mdi:check-circle');
     } catch (e) {
-        resultDiv.innerHTML = `<div class="error-message">
-            <span class="iconify" data-icon="mdi:alert-circle"></span>
-            Error in JSON ${num}: ${e.message}
-        </div>`;
+        showMessage(resultDiv, 'error', `Error in JSON ${num}: ${e.message}`, 'mdi:alert-circle');
     }
     updateCopyButtonVisibility(num);
 }
@@ -117,10 +120,7 @@ function formatJSON(num) {
         jsonObjects[num] = json;
         textarea.value = JSON.stringify(json, null, 2);
         updateLineNumbers(num);
-        resultDiv.innerHTML = `<div class="success-message">
-            <span class="iconify" data-icon="mdi:check-circle"></span>
-            JSON ${num} formatted successfully!
-        </div>`;
+        showMessage(resultDiv, 'success', `JSON ${num} formatted successfully!`, 'mdi:check-circle');
 
         if (currentView[num] === 'tree') {
             renderTree(num);
@@ -131,17 +131,14 @@ function formatJSON(num) {
             convertToSingleLine(num);
         }
     } catch (e) {
-        resultDiv.innerHTML = `<div class="error-message">
-            <span class="iconify" data-icon="mdi:alert-circle"></span>
-            Error in JSON ${num}: ${e.message}
-        </div>`;
+        showMessage(resultDiv, 'error', `Error in JSON ${num}: ${e.message}`, 'mdi:alert-circle');
     }
     updateCopyButtonVisibility(num);
 }
 
 function formatBoth() {
     formatJSON(1);
-    setTimeout(() => formatJSON(2), 100);
+    formatJSON(2);
 }
 
 function minifyBoth() {
@@ -161,15 +158,9 @@ function minifyBoth() {
     });
 
     if (errors.length > 0) {
-        resultDiv.innerHTML = `<div class="error-message">
-            <span class="iconify" data-icon="mdi:alert-circle"></span>
-            Errors:<br>${errors.join('<br>')}
-        </div>`;
+        showMessage(resultDiv, 'error', `Errors:\n${errors.join('\n')}`, 'mdi:alert-circle');
     } else {
-        resultDiv.innerHTML = `<div class="success-message">
-            <span class="iconify" data-icon="mdi:check-circle"></span>
-            Both JSONs minified successfully!
-        </div>`;
+        showMessage(resultDiv, 'success', 'Both JSONs minified successfully!', 'mdi:check-circle');
     }
 }
 
@@ -190,16 +181,168 @@ function renderTree(num) {
     try {
         const json = JSON.parse(textarea.value);
         jsonObjects[num] = json;
-        treeView.innerHTML = buildTree(json, '');
-        addTreeEventListeners(treeView);
+        // Clear previous tree
+        treeView.innerHTML = '';
+        // Build tree using DOM methods
+        const treeFragment = buildTreeDOM(json, '');
+        treeView.appendChild(treeFragment);
     } catch (e) {
-        resultDiv.innerHTML = `<div class="error-message">
-            <span class="iconify" data-icon="mdi:alert-circle"></span>
-            Error parsing JSON ${num}: ${e.message}
-        </div>`;
+        showMessage(resultDiv, 'error', `Error parsing JSON ${num}: ${e.message}`, 'mdi:alert-circle');
     }
 }
 
+// Helper function to create elements safely
+function createElement(tag, className, textContent = null) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (textContent !== null) element.textContent = textContent;
+    return element;
+}
+
+// Helper function to create iconify spans
+function createIcon(iconName) {
+    const span = document.createElement('span');
+    span.className = 'iconify';
+    span.setAttribute('data-icon', iconName);
+    return span;
+}
+
+// Helper function to display messages safely
+function showMessage(container, type, message, iconName) {
+    container.innerHTML = '';
+    const messageClass = type === 'error' ? 'error-message' : 'success-message';
+    const messageDiv = createElement('div', messageClass);
+
+    if (iconName) {
+        messageDiv.appendChild(createIcon(iconName));
+        messageDiv.appendChild(document.createTextNode(' '));
+    }
+    messageDiv.appendChild(document.createTextNode(message));
+    container.appendChild(messageDiv);
+}
+
+// Build tree using safe DOM methods instead of innerHTML
+function buildTreeDOM(obj, path = '', isLast = true) {
+    const fragment = document.createDocumentFragment();
+
+    if (obj === null) {
+        const span = createElement('span', 'tree-value null', 'null');
+        fragment.appendChild(span);
+        return fragment;
+    }
+
+    const type = typeof obj;
+
+    if (type === 'string') {
+        const span = createElement('span', 'tree-value string', `"${obj}"`);
+        fragment.appendChild(span);
+        return fragment;
+    }
+
+    if (type === 'number') {
+        const span = createElement('span', 'tree-value number', String(obj));
+        fragment.appendChild(span);
+        return fragment;
+    }
+
+    if (type === 'boolean') {
+        const span = createElement('span', 'tree-value boolean', String(obj));
+        fragment.appendChild(span);
+        return fragment;
+    }
+
+    if (Array.isArray(obj)) {
+        if (obj.length === 0) {
+            const span = createElement('span', 'tree-bracket', '[]');
+            fragment.appendChild(span);
+            return fragment;
+        }
+
+        const toggle = createElement('span', 'tree-toggle');
+        toggle.appendChild(createIcon('mdi:chevron-down'));
+        toggle.onclick = function() { toggleNode(this); };
+        toggle.setAttribute('role', 'button');
+        toggle.setAttribute('aria-label', 'Toggle array');
+        toggle.setAttribute('tabindex', '0');
+        toggle.onkeydown = function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleNode(this);
+            }
+        };
+        fragment.appendChild(toggle);
+
+        fragment.appendChild(createElement('span', 'tree-bracket', '['));
+        fragment.appendChild(createElement('span', 'tree-count', `${obj.length} items`));
+
+        const children = createElement('div', 'tree-children');
+        obj.forEach((item, index) => {
+            const node = createElement('div', 'tree-node');
+            const keySpan = createElement('span', 'tree-key', `${index}:`);
+            node.appendChild(keySpan);
+            node.appendChild(document.createTextNode(' '));
+            node.appendChild(buildTreeDOM(item, `${path}[${index}]`, index === obj.length - 1));
+
+            if (index < obj.length - 1) {
+                node.appendChild(createElement('span', 'tree-bracket', ','));
+            }
+            children.appendChild(node);
+        });
+
+        fragment.appendChild(children);
+        fragment.appendChild(createElement('span', 'tree-bracket', ']'));
+        return fragment;
+    }
+
+    if (type === 'object') {
+        const keys = Object.keys(obj);
+        if (keys.length === 0) {
+            const span = createElement('span', 'tree-bracket', '{}');
+            fragment.appendChild(span);
+            return fragment;
+        }
+
+        const toggle = createElement('span', 'tree-toggle');
+        toggle.appendChild(createIcon('mdi:chevron-down'));
+        toggle.onclick = function() { toggleNode(this); };
+        toggle.setAttribute('role', 'button');
+        toggle.setAttribute('aria-label', 'Toggle object');
+        toggle.setAttribute('tabindex', '0');
+        toggle.onkeydown = function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleNode(this);
+            }
+        };
+        fragment.appendChild(toggle);
+
+        fragment.appendChild(createElement('span', 'tree-bracket', '{'));
+        fragment.appendChild(createElement('span', 'tree-count', `${keys.length} keys`));
+
+        const children = createElement('div', 'tree-children');
+        keys.forEach((key, index) => {
+            const node = createElement('div', 'tree-node');
+            const keySpan = createElement('span', 'tree-key', `"${key}":`);
+            node.appendChild(keySpan);
+            node.appendChild(document.createTextNode(' '));
+            node.appendChild(buildTreeDOM(obj[key], `${path}.${key}`, index === keys.length - 1));
+
+            if (index < keys.length - 1) {
+                node.appendChild(createElement('span', 'tree-bracket', ','));
+            }
+            children.appendChild(node);
+        });
+
+        fragment.appendChild(children);
+        fragment.appendChild(createElement('span', 'tree-bracket', '}'));
+        return fragment;
+    }
+
+    fragment.appendChild(document.createTextNode(String(obj)));
+    return fragment;
+}
+
+// Legacy function kept for compatibility (not used anymore)
 function buildTree(obj, path = '', isLast = true) {
     if (obj === null) {
         return `<span class="tree-value null">null</span>`;
@@ -286,10 +429,6 @@ function toggleNode(element) {
     }
 }
 
-function addTreeEventListeners(container) {
-    // Event listeners are added via onclick in the HTML
-}
-
 function expandAllTrees() {
     document.querySelectorAll('.tree-children.collapsed').forEach(el => {
         el.classList.remove('collapsed');
@@ -320,10 +459,7 @@ function compareJSON() {
     const json2Text = document.getElementById('json2').value;
 
     if (!json1Text || !json2Text) {
-        resultDiv.innerHTML = `<div class="error-message">
-            <span class="iconify" data-icon="mdi:alert-circle"></span>
-            Vui lòng nhập cả 2 JSON để so sánh!
-        </div>`;
+        showMessage(resultDiv, 'error', 'Please enter both JSON inputs to compare!', 'mdi:alert-circle');
         return;
     }
 
@@ -336,11 +472,20 @@ function compareJSON() {
         const differences = findDifferences(obj1, obj2);
         displayDifferences(differences);
     } catch (e) {
-        resultDiv.innerHTML = `<div class="error-message">
-            <span class="iconify" data-icon="mdi:alert-circle"></span>
-            JSON parsing error: ${e.message}
-        </div>`;
+        showMessage(resultDiv, 'error', `JSON parsing error: ${e.message}`, 'mdi:alert-circle');
     }
+}
+
+// Deep equality comparison for primitive values
+function deepEquals(val1, val2) {
+    // Handle primitives and null
+    if (val1 === val2) return true;
+    if (val1 === null || val2 === null) return false;
+    if (typeof val1 !== 'object' || typeof val2 !== 'object') return false;
+
+    // For objects and arrays in difference detection, we only need primitive comparison
+    // Complex objects are handled recursively by findDifferences
+    return false;
 }
 
 function findDifferences(obj1, obj2, path = '') {
@@ -385,7 +530,7 @@ function findDifferences(obj1, obj2, path = '') {
                 if (typeof obj1[i] === 'object' && obj1[i] !== null &&
                     typeof obj2[i] === 'object' && obj2[i] !== null) {
                     diffs.push(...findDifferences(obj1[i], obj2[i], currentPath));
-                } else if (JSON.stringify(obj1[i]) !== JSON.stringify(obj2[i])) {
+                } else if (!deepEquals(obj1[i], obj2[i])) {
                     diffs.push({
                         type: 'changed',
                         path: currentPath,
@@ -437,7 +582,7 @@ function findDifferences(obj1, obj2, path = '') {
                 if (typeof val1 === 'object' && val1 !== null &&
                     typeof val2 === 'object' && val2 !== null) {
                     diffs.push(...findDifferences(val1, val2, currentPath));
-                } else if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+                } else if (!deepEquals(val1, val2)) {
                     diffs.push({
                         type: 'changed',
                         path: currentPath,
@@ -454,14 +599,10 @@ function findDifferences(obj1, obj2, path = '') {
 
 function displayDifferences(differences) {
     const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '';
 
     if (differences.length === 0) {
-        resultDiv.innerHTML = `
-            <div class="success-message">
-                <span class="iconify" data-icon="mdi:check-circle"></span>
-                Hai JSON hoàn toàn giống nhau!
-            </div>
-        `;
+        showMessage(resultDiv, 'success', 'Both JSONs are identical!', 'mdi:check-circle');
         return;
     }
 
@@ -471,78 +612,102 @@ function displayDifferences(differences) {
         changed: differences.filter(d => d.type === 'changed').length
     };
 
-    let html = `
-        <div class="stats">
-            <div class="stat-item">
-                <span class="stat-label">Total Differences:</span>
-                <span class="stat-value">${differences.length}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">
-                    <span class="iconify" data-icon="mdi:plus-circle"></span>
-                    Added:
-                </span>
-                <span class="stat-value" style="color: #28a745;">${stats.added}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">
-                    <span class="iconify" data-icon="mdi:minus-circle"></span>
-                    Removed:
-                </span>
-                <span class="stat-value" style="color: #dc3545;">${stats.removed}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">
-                    <span class="iconify" data-icon="mdi:sync"></span>
-                    Changed:
-                </span>
-                <span class="stat-value" style="color: #ffc107;">${stats.changed}</span>
-            </div>
-        </div>
-        <div class="diff-container">
-    `;
+    // Create stats container
+    const statsDiv = createElement('div', 'stats');
+
+    // Total differences
+    const totalStat = createElement('div', 'stat-item');
+    totalStat.appendChild(createElement('span', 'stat-label', 'Total Differences:'));
+    totalStat.appendChild(createElement('span', 'stat-value', String(differences.length)));
+    statsDiv.appendChild(totalStat);
+
+    // Added stat
+    const addedStat = createElement('div', 'stat-item');
+    const addedLabel = createElement('span', 'stat-label');
+    addedLabel.appendChild(createIcon('mdi:plus-circle'));
+    addedLabel.appendChild(document.createTextNode(' Added:'));
+    const addedValue = createElement('span', 'stat-value', String(stats.added));
+    addedValue.style.color = '#28a745';
+    addedStat.appendChild(addedLabel);
+    addedStat.appendChild(addedValue);
+    statsDiv.appendChild(addedStat);
+
+    // Removed stat
+    const removedStat = createElement('div', 'stat-item');
+    const removedLabel = createElement('span', 'stat-label');
+    removedLabel.appendChild(createIcon('mdi:minus-circle'));
+    removedLabel.appendChild(document.createTextNode(' Removed:'));
+    const removedValue = createElement('span', 'stat-value', String(stats.removed));
+    removedValue.style.color = '#dc3545';
+    removedStat.appendChild(removedLabel);
+    removedStat.appendChild(removedValue);
+    statsDiv.appendChild(removedStat);
+
+    // Changed stat
+    const changedStat = createElement('div', 'stat-item');
+    const changedLabel = createElement('span', 'stat-label');
+    changedLabel.appendChild(createIcon('mdi:sync'));
+    changedLabel.appendChild(document.createTextNode(' Changed:'));
+    const changedValue = createElement('span', 'stat-value', String(stats.changed));
+    changedValue.style.color = '#ffc107';
+    changedStat.appendChild(changedLabel);
+    changedStat.appendChild(changedValue);
+    statsDiv.appendChild(changedStat);
+
+    resultDiv.appendChild(statsDiv);
+
+    // Create diff container
+    const diffContainer = createElement('div', 'diff-container');
 
     differences.forEach(diff => {
         const typeClass = `diff-${diff.type}`;
-        const typeLabel = {
-            'added': '<span class="iconify" data-icon="mdi:plus-circle"></span> ADDED',
-            'removed': '<span class="iconify" data-icon="mdi:minus-circle"></span> REMOVED',
-            'changed': '<span class="iconify" data-icon="mdi:sync"></span> CHANGED'
-        }[diff.type];
+        const diffItem = createElement('div', `diff-item ${typeClass}`);
 
-        html += `
-            <div class="diff-item ${typeClass}">
-                <div class="diff-path">${typeLabel}: ${diff.path}</div>
-        `;
+        // Create path header
+        const pathDiv = createElement('div', 'diff-path');
 
+        const typeIcons = {
+            'added': 'mdi:plus-circle',
+            'removed': 'mdi:minus-circle',
+            'changed': 'mdi:sync'
+        };
+        const typeLabels = {
+            'added': 'ADDED',
+            'removed': 'REMOVED',
+            'changed': 'CHANGED'
+        };
+
+        pathDiv.appendChild(createIcon(typeIcons[diff.type]));
+        pathDiv.appendChild(document.createTextNode(` ${typeLabels[diff.type]}: ${diff.path}`));
+        diffItem.appendChild(pathDiv);
+
+        // Create value display
         if (diff.type === 'changed') {
-            html += `
-                <div class="diff-value">
-                    <strong>JSON 1:</strong> ${JSON.stringify(diff.value1, null, 2)}
-                </div>
-                <div class="diff-value" style="margin-top: 8px;">
-                    <strong>JSON 2:</strong> ${JSON.stringify(diff.value2, null, 2)}
-                </div>
-            `;
-        } else if (diff.type === 'removed') {
-            html += `
-                <div class="diff-value">
-                    <strong>Value:</strong> ${JSON.stringify(diff.value1, null, 2)}
-                </div>
-            `;
+            const value1Div = createElement('div', 'diff-value');
+            const strong1 = createElement('strong', null, 'JSON 1:');
+            value1Div.appendChild(strong1);
+            value1Div.appendChild(document.createTextNode(' ' + JSON.stringify(diff.value1, null, 2)));
+            diffItem.appendChild(value1Div);
+
+            const value2Div = createElement('div', 'diff-value');
+            value2Div.style.marginTop = '8px';
+            const strong2 = createElement('strong', null, 'JSON 2:');
+            value2Div.appendChild(strong2);
+            value2Div.appendChild(document.createTextNode(' ' + JSON.stringify(diff.value2, null, 2)));
+            diffItem.appendChild(value2Div);
         } else {
-            html += `
-                <div class="diff-value">
-                    <strong>Value:</strong> ${JSON.stringify(diff.value2, null, 2)}
-                </div>
-            `;
+            const valueDiv = createElement('div', 'diff-value');
+            const strong = createElement('strong', null, 'Value:');
+            valueDiv.appendChild(strong);
+            const value = diff.type === 'removed' ? diff.value1 : diff.value2;
+            valueDiv.appendChild(document.createTextNode(' ' + JSON.stringify(value, null, 2)));
+            diffItem.appendChild(valueDiv);
         }
 
-        html += `</div>`;
+        diffContainer.appendChild(diffItem);
     });
 
-    html += `</div>`;
-    resultDiv.innerHTML = html;
+    resultDiv.appendChild(diffContainer);
 }
 
 // Resize Handle Functionality
@@ -553,10 +718,6 @@ function initializeResizeHandle() {
     const content = document.querySelector('.json-panels-container');
 
     if (!resizeHandle || !panel1 || !panel2) return;
-
-    resizeHandle.addEventListener('mousedown', startResize);
-    document.addEventListener('mousemove', doResize);
-    document.addEventListener('mouseup', stopResize);
 
     function startResize(e) {
         isResizing = true;
@@ -571,6 +732,10 @@ function initializeResizeHandle() {
         resizeHandle.classList.add('dragging');
         document.body.style.cursor = 'col-resize';
         document.body.style.userSelect = 'none';
+
+        // Add listeners only when resizing starts
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
 
         e.preventDefault();
     }
@@ -603,7 +768,14 @@ function initializeResizeHandle() {
         resizeHandle.classList.remove('dragging');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+
+        // Remove listeners when resizing stops
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
     }
+
+    // Only attach mousedown to the resize handle
+    resizeHandle.addEventListener('mousedown', startResize);
 
     // Handle window resize to maintain proportions
     window.addEventListener('resize', () => {
@@ -662,8 +834,6 @@ function copyContent(num) {
 
         // Reset after 3 seconds
         copyBtn.resetTimeout = setTimeout(() => {
-            console.log('Resetting copy button icon after 3s...');
-
             // Restore original copy icon HTML
             copyBtn.innerHTML = copyBtn.originalHTML;
             copyBtn.classList.remove('copied');
@@ -706,8 +876,6 @@ function fallbackCopyTextToClipboard(text, copyBtn) {
 
         // Reset after 3 seconds
         copyBtn.resetTimeout = setTimeout(() => {
-            console.log('Resetting fallback copy button icon after 3s...');
-
             // Restore original copy icon HTML
             copyBtn.innerHTML = copyBtn.originalHTML;
             copyBtn.classList.remove('copied');
@@ -715,7 +883,7 @@ function fallbackCopyTextToClipboard(text, copyBtn) {
             copyBtn.resetTimeout = null;
         }, 3000);
     } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
+        // Copy operation failed silently
     }
 
     document.body.removeChild(textArea);

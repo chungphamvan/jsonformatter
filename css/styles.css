@@ -580,16 +580,3 @@ textarea:focus {
     opacity: 1;
     visibility: visible;
 }
-
-/* Ensure textarea wrapper has relative positioning */
-.textarea-wrapper {
-    position: relative;
-    display: flex;
-    gap: 0;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    overflow: hidden;
-    min-height: 400px;
-    height: 60vh;
-    max-height: 800px;
-}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +18,7 @@
                 <span class="iconify" data-icon="mdi:file-tree" data-inline="false" style="vertical-align: middle;"></span>
                 JSON Formatter with Tree View
             </h1>
-            <p>Format, collapse/expand và so sánh JSON data</p>
+            <p>Format, collapse/expand and compare JSON data</p>
         </div>
 
         <div class="controls">
@@ -56,29 +56,29 @@
                             <span class="iconify" data-icon="mdi:file-document-outline"></span>
                             JSON Data 1
                         </span>
-                        <div class="view-toggle">
-                            <button class="toggle-btn active" onclick="switchView(1, 'text')">
+                        <div class="view-toggle" role="group" aria-label="View mode for JSON 1">
+                            <button class="toggle-btn active" onclick="switchView(1, 'text')" aria-pressed="true" aria-label="Text view mode">
                                 <span class="iconify" data-icon="mdi:text"></span>
                                 Text
                             </button>
-                            <button class="toggle-btn" onclick="switchView(1, 'single')">
+                            <button class="toggle-btn" onclick="switchView(1, 'single')" aria-pressed="false" aria-label="Single line view mode">
                                 <span class="iconify" data-icon="mdi:code-tags"></span>
                                 Single Line
                             </button>
-                            <button class="toggle-btn" onclick="switchView(1, 'tree')">
+                            <button class="toggle-btn" onclick="switchView(1, 'tree')" aria-pressed="false" aria-label="Tree view mode">
                                 <span class="iconify" data-icon="mdi:file-tree"></span>
                                 Tree
                             </button>
                         </div>
                     </div>
                     <div class="textarea-wrapper" id="wrapper1">
-                        <div class="line-numbers" id="lineNumbers1"></div>
-                        <textarea id="json1" placeholder='Paste JSON data 1 here...' oninput="updateLineNumbers(1)" onscroll="syncScroll(1)"></textarea>
+                        <div class="line-numbers" id="lineNumbers1" aria-hidden="true"></div>
+                        <textarea id="json1" placeholder='Paste JSON data 1 here...' oninput="updateLineNumbers(1)" onscroll="syncScroll(1)" aria-label="JSON input 1"></textarea>
                         <button class="copy-button" id="copyBtn1" onclick="copyContent(1)" title="Copy to clipboard">
                             <span class="iconify" data-icon="mdi:content-copy"></span>
                         </button>
                     </div>
-                    <div id="tree1" class="tree-view"></div>
+                    <div id="tree1" class="tree-view" role="tree" aria-label="JSON 1 tree view"></div>
                     <div class="panel-controls">
                         <button class="btn btn-primary" onclick="formatJSON(1)">Format JSON 1</button>
                         <button class="btn btn-info" onclick="renderTree(1)">Show Tree View</button>
@@ -98,29 +98,29 @@
                             <span class="iconify" data-icon="mdi:file-document-outline"></span>
                             JSON Data 2
                         </span>
-                        <div class="view-toggle">
-                            <button class="toggle-btn active" onclick="switchView(2, 'text')">
+                        <div class="view-toggle" role="group" aria-label="View mode for JSON 2">
+                            <button class="toggle-btn active" onclick="switchView(2, 'text')" aria-pressed="true" aria-label="Text view mode">
                                 <span class="iconify" data-icon="mdi:text"></span>
                                 Text
                             </button>
-                            <button class="toggle-btn" onclick="switchView(2, 'single')">
+                            <button class="toggle-btn" onclick="switchView(2, 'single')" aria-pressed="false" aria-label="Single line view mode">
                                 <span class="iconify" data-icon="mdi:code-tags"></span>
                                 Single Line
                             </button>
-                            <button class="toggle-btn" onclick="switchView(2, 'tree')">
+                            <button class="toggle-btn" onclick="switchView(2, 'tree')" aria-pressed="false" aria-label="Tree view mode">
                                 <span class="iconify" data-icon="mdi:file-tree"></span>
                                 Tree
                             </button>
                         </div>
                     </div>
                     <div class="textarea-wrapper" id="wrapper2">
-                        <div class="line-numbers" id="lineNumbers2"></div>
-                        <textarea id="json2" placeholder='Paste JSON data 2 here...' oninput="updateLineNumbers(2)" onscroll="syncScroll(2)"></textarea>
+                        <div class="line-numbers" id="lineNumbers2" aria-hidden="true"></div>
+                        <textarea id="json2" placeholder='Paste JSON data 2 here...' oninput="updateLineNumbers(2)" onscroll="syncScroll(2)" aria-label="JSON input 2"></textarea>
                         <button class="copy-button" id="copyBtn2" onclick="copyContent(2)" title="Copy to clipboard">
                             <span class="iconify" data-icon="mdi:content-copy"></span>
                         </button>
                     </div>
-                    <div id="tree2" class="tree-view"></div>
+                    <div id="tree2" class="tree-view" role="tree" aria-label="JSON 2 tree view"></div>
                     <div class="panel-controls">
                         <button class="btn btn-primary" onclick="formatJSON(2)">Format JSON 2</button>
                         <button class="btn btn-info" onclick="renderTree(2)">Show Tree View</button>
