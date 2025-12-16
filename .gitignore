@@ -1,2 +1,5 @@
 # Claude Code agent files
 .claude/
+
+# Git files
+.gitignore
