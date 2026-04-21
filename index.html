@@ -163,35 +163,35 @@
             <div class="modal-body">
                 <div class="export-field">
                     <label for="exportRuleName">Rule Name</label>
-                    <input type="text" id="exportRuleName" placeholder="e.g. offer long text comment" />
+                    <input type="text" id="exportRuleName" placeholder="e.g. mock login response" />
                 </div>
 
                 <div class="export-field">
                     <label for="exportLocationUrl">Location URL</label>
-                    <input type="text" id="exportLocationUrl" placeholder="e.g. https://example.com:443/api/v2/items?frame_id=42"
+                    <input type="text" id="exportLocationUrl" placeholder="e.g. https://your-domain.com/api/login"
                         oninput="parseLocationURL(this.value)" />
                 </div>
 
                 <div class="export-parsed-grid">
                     <div class="export-field">
                         <label for="exportProtocol">Protocol</label>
-                        <input type="text" id="exportProtocol" placeholder="https" />
+                        <input type="text" id="exportProtocol" placeholder="e.g. https" />
                     </div>
                     <div class="export-field">
                         <label for="exportHost">Host</label>
-                        <input type="text" id="exportHost" placeholder="example.com" />
+                        <input type="text" id="exportHost" placeholder="e.g. your-domain.com" />
                     </div>
                     <div class="export-field">
                         <label for="exportPort">Port</label>
-                        <input type="text" id="exportPort" placeholder="443" />
+                        <input type="text" id="exportPort" placeholder="e.g. 443" />
                     </div>
                     <div class="export-field">
                         <label for="exportPath">Path</label>
-                        <input type="text" id="exportPath" placeholder="/api/v2/items" />
+                        <input type="text" id="exportPath" placeholder="e.g. /api/login" />
                     </div>
                     <div class="export-field export-field-full">
                         <label for="exportQuery">Query</label>
-                        <input type="text" id="exportQuery" placeholder="frame_id=42" />
+                        <input type="text" id="exportQuery" placeholder="e.g. page=1&limit=20" />
                     </div>
                 </div>
 
