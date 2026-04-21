@@ -580,3 +580,218 @@ textarea:focus {
     opacity: 1;
     visibility: visible;
 }
+
+/* ===== Export XML Button ===== */
+.btn-charles {
+    background: #2d6a4f;
+    color: white;
+}
+
+.btn-charles:hover {
+    background: #1b4332;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.4);
+}
+
+/* ===== Export XML Modal ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.modal-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 2px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+    background: #f8f9fa;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Export form fields */
+.export-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.export-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.export-field input[type="text"] {
+    padding: 9px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.export-field input[type="text"]:focus {
+    outline: none;
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+}
+
+/* Parsed location 2x2+1 grid */
+.export-parsed-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 14px;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.export-field-full {
+    grid-column: 1 / -1;
+}
+
+/* JSON source radio toggle */
+.export-source-toggle {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.export-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    padding: 6px 14px;
+    border: 2px solid #dee2e6;
+    border-radius: 20px;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.export-radio input[type="radio"] {
+    accent-color: #2d6a4f;
+}
+
+.export-radio:has(input:checked) {
+    border-color: #2d6a4f;
+    background: #d8f3dc;
+    color: #1b4332;
+}
+
+/* JSON body textarea */
+.export-body-wrapper {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.export-body-wrapper:focus-within {
+    border-color: #2d6a4f;
+    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+}
+
+#exportJsonBody {
+    width: 100%;
+    height: 180px;
+    padding: 12px;
+    border: none;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    resize: vertical;
+    display: block;
+}
+
+#exportJsonBody:focus {
+    outline: none;
+}
+
+.export-body-error {
+    font-size: 12px;
+    color: #dc3545;
+    padding: 6px 10px;
+    background: #f8d7da;
+    border-radius: 4px;
+    border-left: 3px solid #dc3545;
+}
+
+/* Disabled export button */
+#exportXmlBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

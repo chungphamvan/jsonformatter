@@ -14,6 +14,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initializeResizeHandle();
     updateCopyButtonVisibility(1);
     updateCopyButtonVisibility(2);
+    initializeExportModal();
 });
 
 function updateLineNumbers(num) {
@@ -844,6 +845,185 @@ function copyContent(num) {
         // Fallback for older browsers
         fallbackCopyTextToClipboard(content, copyBtn);
     });
+}
+
+// ===== Export Charles Rewrite XML =====
+
+function openExportXML() {
+    const modal = document.getElementById('exportXmlModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Default: sync from JSON 1 if available
+    syncJsonSource(1);
+}
+
+function closeExportXML() {
+    const modal = document.getElementById('exportXmlModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function initializeExportModal() {
+    const modal = document.getElementById('exportXmlModal');
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeExportXML();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeExportXML();
+    });
+}
+
+function parseLocationURL(value) {
+    const protocol = document.getElementById('exportProtocol');
+    const host = document.getElementById('exportHost');
+    const port = document.getElementById('exportPort');
+    const path = document.getElementById('exportPath');
+    const query = document.getElementById('exportQuery');
+
+    const v = value.trim();
+    if (!v) {
+        [protocol, host, port, path, query].forEach(el => el.value = '');
+        return;
+    }
+
+    try {
+        // Prepend scheme if missing so URL() can parse it
+        const urlStr = /^https?:\/\//i.test(v) ? v : 'https://' + v;
+        const u = new URL(urlStr);
+
+        protocol.value = u.protocol.replace(':', '');
+        host.value = u.hostname;
+
+        // Derive port: explicit > default by scheme
+        if (u.port) {
+            port.value = u.port;
+        } else {
+            port.value = u.protocol === 'https:' ? '443' : '80';
+        }
+
+        path.value = u.pathname;
+        query.value = u.search ? u.search.slice(1) : '';
+    } catch (e) {
+        // Invalid URL — clear parsed fields silently
+        [protocol, host, port, path, query].forEach(el => el.value = '');
+    }
+}
+
+function syncJsonSource(source) {
+    const bodyTA = document.getElementById('exportJsonBody');
+    if (source === 'custom') return;
+
+    const srcTA = document.getElementById('json' + source);
+    if (srcTA && srcTA.value.trim()) {
+        bodyTA.value = srcTA.value.trim();
+    } else {
+        bodyTA.value = '';
+    }
+    validateExportBody();
+}
+
+function validateExportBody() {
+    const bodyTA = document.getElementById('exportJsonBody');
+    const errorDiv = document.getElementById('exportBodyError');
+    const exportBtn = document.getElementById('exportXmlBtn');
+    const value = bodyTA.value.trim();
+
+    if (!value) {
+        errorDiv.style.display = 'none';
+        exportBtn.disabled = true;
+        return false;
+    }
+
+    try {
+        JSON.parse(value);
+        errorDiv.style.display = 'none';
+        exportBtn.disabled = false;
+        return true;
+    } catch (e) {
+        errorDiv.textContent = 'Invalid JSON: ' + e.message;
+        errorDiv.style.display = 'block';
+        exportBtn.disabled = true;
+        return false;
+    }
+}
+
+function xmlEscape(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&apos;');
+}
+
+function generateCharlesXML({ name, protocol, host, port, path, query, body }) {
+    const escapedBody = xmlEscape(body);
+    return `<?xml version='1.0' encoding='UTF-8' ?>
+<?charles serialisation-version='2.0' ?>
+<rewriteSet-array>
+  <rewriteSet>
+    <active>true</active>
+    <name>${xmlEscape(name)}</name>
+    <hosts>
+      <locationPatterns>
+        <locationMatch>
+          <location>
+            <protocol>${xmlEscape(protocol)}</protocol>
+            <host>${xmlEscape(host)}</host>
+            <port>${xmlEscape(port)}</port>
+            <path>${xmlEscape(path)}</path>
+            <query>${xmlEscape(query)}</query>
+          </location>
+          <enabled>true</enabled>
+        </locationMatch>
+      </locationPatterns>
+    </hosts>
+    <rules>
+      <rewriteRule>
+        <active>true</active>
+        <ruleType>7</ruleType>
+        <matchValue></matchValue>
+        <matchHeaderRegex>false</matchHeaderRegex>
+        <matchValueRegex>false</matchValueRegex>
+        <matchRequest>false</matchRequest>
+        <matchResponse>true</matchResponse>
+        <newValue>${escapedBody}</newValue>
+        <newHeaderRegex>false</newHeaderRegex>
+        <newValueRegex>false</newValueRegex>
+        <matchWholeValue>true</matchWholeValue>
+        <caseSensitive>false</caseSensitive>
+        <replaceType>2</replaceType>
+      </rewriteRule>
+    </rules>
+  </rewriteSet>
+</rewriteSet-array>`;
+}
+
+function exportCharlesXML() {
+    if (!validateExportBody()) return;
+
+    const name = document.getElementById('exportRuleName').value.trim() || 'charles-rewrite';
+    const protocol = document.getElementById('exportProtocol').value.trim();
+    const host = document.getElementById('exportHost').value.trim();
+    const port = document.getElementById('exportPort').value.trim();
+    const path = document.getElementById('exportPath').value.trim();
+    const query = document.getElementById('exportQuery').value.trim();
+    const body = document.getElementById('exportJsonBody').value.trim();
+
+    const xml = generateCharlesXML({ name, protocol, host, port, path, query, body });
+
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name.replace(/[^a-z0-9_\-]/gi, '_') + '.xml';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    closeExportXML();
 }
 
 function fallbackCopyTextToClipboard(text, copyBtn) {

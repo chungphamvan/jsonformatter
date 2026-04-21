@@ -47,6 +47,10 @@
                 <span class="iconify" data-icon="mdi:delete"></span>
                 Clear All
             </button>
+            <button class="btn btn-charles" onclick="openExportXML()">
+                <span class="iconify" data-icon="mdi:export"></span>
+                Export XML
+            </button>
         </div>
 
         <div class="content">
@@ -140,6 +144,87 @@
 
         <div class="footer">
             <p>Copyright © 2025 <strong>Shino</strong> JSON Formatter - All Rights Reserved</p>
+        </div>
+    </div>
+
+    <!-- Export XML Modal -->
+    <div id="exportXmlModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" style="display:none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span id="exportModalTitle">
+                    <span class="iconify" data-icon="mdi:xml"></span>
+                    Export Charles Rewrite XML
+                </span>
+                <button class="modal-close" onclick="closeExportXML()" aria-label="Close modal">
+                    <span class="iconify" data-icon="mdi:close"></span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="export-field">
+                    <label for="exportRuleName">Rule Name</label>
+                    <input type="text" id="exportRuleName" placeholder="e.g. offer long text comment" />
+                </div>
+
+                <div class="export-field">
+                    <label for="exportLocationUrl">Location URL</label>
+                    <input type="text" id="exportLocationUrl" placeholder="e.g. https://example.com:443/api/v2/items?frame_id=42"
+                        oninput="parseLocationURL(this.value)" />
+                </div>
+
+                <div class="export-parsed-grid">
+                    <div class="export-field">
+                        <label for="exportProtocol">Protocol</label>
+                        <input type="text" id="exportProtocol" placeholder="https" />
+                    </div>
+                    <div class="export-field">
+                        <label for="exportHost">Host</label>
+                        <input type="text" id="exportHost" placeholder="example.com" />
+                    </div>
+                    <div class="export-field">
+                        <label for="exportPort">Port</label>
+                        <input type="text" id="exportPort" placeholder="443" />
+                    </div>
+                    <div class="export-field">
+                        <label for="exportPath">Path</label>
+                        <input type="text" id="exportPath" placeholder="/api/v2/items" />
+                    </div>
+                    <div class="export-field export-field-full">
+                        <label for="exportQuery">Query</label>
+                        <input type="text" id="exportQuery" placeholder="frame_id=42" />
+                    </div>
+                </div>
+
+                <div class="export-field">
+                    <label>Response Body (JSON Source)</label>
+                    <div class="export-source-toggle">
+                        <label class="export-radio">
+                            <input type="radio" name="jsonSource" value="1" checked onchange="syncJsonSource(1)" />
+                            <span>JSON 1</span>
+                        </label>
+                        <label class="export-radio">
+                            <input type="radio" name="jsonSource" value="2" onchange="syncJsonSource(2)" />
+                            <span>JSON 2</span>
+                        </label>
+                        <label class="export-radio">
+                            <input type="radio" name="jsonSource" value="custom" onchange="syncJsonSource('custom')" />
+                            <span>Custom</span>
+                        </label>
+                    </div>
+                    <div class="export-body-wrapper">
+                        <textarea id="exportJsonBody" placeholder="Paste or load JSON response body here..." oninput="validateExportBody()"></textarea>
+                    </div>
+                    <div id="exportBodyError" class="export-body-error" style="display:none;"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeExportXML()">Cancel</button>
+                <button class="btn btn-charles" id="exportXmlBtn" onclick="exportCharlesXML()">
+                    <span class="iconify" data-icon="mdi:download"></span>
+                    Export XML File
+                </button>
+            </div>
         </div>
     </div>
 
